@@ -36,28 +36,36 @@ document.addEventListener('turbolinks:load', () => {
         data: function(){
           return { 
             products: products,
-            testArray: [],
-            yaMother: {},
+            displayScan: [],
+            scanHash: {},
             scan: null,
+            deleteing: null,
             qty: "1",
             scannedItems: []
           }
         },
         methods: {
-          //${Object.keys(this.yaMother).length}
+          deleteItem(index) {
+            this.deleteing = (this.scannedItems[this.scannedItems.length - (index + 1)].scan);
+            this.scannedItems.splice(this.scannedItems.length - (index + 1), 1);
+            this.scanHash[this.deleteing].qty -= 1;
+            this.displayScan.find( fruit => fruit.product === `${this.deleteing}` ).qty -= 1;
+            this.$refs.scan.focus();
+          },
+          //${Object.keys(this.scanHash).length}
           addItem: function(){
             if ( !this.scan ) {
               this.scan = null;
               this.$refs.scan.focus();
             } else {
             this.scannedItems.push({ scan: this.scan });
-            if ( !this.yaMother[this.scan] ) {
-            _.setWith(this.yaMother, `[${this.scan}]["qty"]`, 1, Object);
-            _.setWith(this.yaMother[this.scan], ["spot"], Object.keys(this.yaMother).length, Object);
-            this.testArray.push({ 'product': this.scan, 'qty': 1} )
+            if ( !this.scanHash[this.scan] ) {
+            _.setWith(this.scanHash, `[${this.scan}]["qty"]`, 1, Object);
+            _.setWith(this.scanHash[this.scan], ["spot"], Object.keys(this.scanHash).length, Object);
+            this.displayScan.push({ 'product': this.scan, 'qty': 1} )
             } else {
-            this.yaMother[this.scan].qty += 1;
-            this.testArray.find( fruit => fruit.product === `${this.scan}` ).qty += 1;
+            this.scanHash[this.scan].qty += 1;
+            this.displayScan.find( fruit => fruit.product === `${this.scan}` ).qty += 1;
             }
             this.scan = null;
             this.$refs.scan.focus();
@@ -70,7 +78,7 @@ document.addEventListener('turbolinks:load', () => {
               return "Press Enter to submit";
             } else {
               var firstScan = this.scannedItems.slice().reverse()[0].scan;
-              return `Position: ${this.yaMother[firstScan].spot}`;
+              return `Position: ${this.scanHash[firstScan].spot}`;
             }
           },
           awesometwo(){
@@ -82,7 +90,7 @@ document.addEventListener('turbolinks:load', () => {
           },
           findTest(){
             //const result = inventory.find( fruit => fruit.name === 'cherries' );
-            return this.testArray.find( fruit => fruit.product === 'yeet' );
+            return this.displayScan.find( fruit => fruit.product === 'yeet' );
           },
           scanOrder() {
             return this.scanned.slice().reverse();
